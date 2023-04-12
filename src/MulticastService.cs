@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Logging;
@@ -33,7 +31,6 @@ namespace Makaretu.Dns
 
         static readonly TimeSpan maxLegacyUnicastTTL = TimeSpan.FromSeconds(10);
         static readonly ILog log = LogManager.GetLogger(typeof(MulticastService));
-        static readonly IPNetwork[] LinkLocalNetworks = new[] { IPNetwork.Parse("169.254.0.0/16"), IPNetwork.Parse("fe80::/10") };
 
         List<NetworkInterface> knownNics = new List<NetworkInterface>();
         int maxPacketSize;
@@ -165,20 +162,6 @@ namespace Makaretu.Dns
         public bool IgnoreDuplicateMessages { get; set; }
 
         /// <summary>
-        ///   The interval for discovering network interfaces.
-        /// </summary>
-        /// <value>
-        ///   Default is 2 minutes.
-        /// </value>
-        /// <remarks>
-        ///   When the interval is reached a task is started to discover any
-        ///   new network interfaces. 
-        /// </remarks>
-        /// <seealso cref="NetworkInterfaceDiscovered"/>
-        [Obsolete("This property is deprecated and will be removed in nearest future. Using timer removed with obsording of NetworkChange.NetworkAddressChanged event.", false)]
-        public TimeSpan NetworkInterfaceDiscoveryInterval { get; set; } = TimeSpan.FromMinutes(2);
-
-        /// <summary>
         ///   Get the network interfaces that are useable.
         /// </summary>
         /// <returns>
@@ -268,6 +251,11 @@ namespace Makaretu.Dns
             AnswerReceived = null;
             NetworkInterfaceDiscovered = null;
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
+            }
+
             // Stop current UDP listener
             client?.Dispose();
             client = null;
@@ -332,11 +320,7 @@ namespace Makaretu.Dns
                 // so no event). Rebinding fixes this.
                 //
                 // Do magic only on Windows.
-#if NET461
-                if (Environment.OSVersion.Platform.ToString().StartsWith("Win"))
-#else
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-#endif
                 {
                     NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
                     NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
@@ -381,7 +365,7 @@ namespace Makaretu.Dns
         /// <param name="name">
         ///   A domain name that should end with ".local", e.g. "myservice.local".
         /// </param>
-        /// <param name="klass">
+        /// <param name="class">
         ///   The class, defaults to <see cref="DnsClass.IN"/>.
         /// </param>
         /// <param name="type">
@@ -394,7 +378,7 @@ namespace Makaretu.Dns
         /// <exception cref="InvalidOperationException">
         ///   When the service has not started.
         /// </exception>
-        public void SendQuery(DomainName name, DnsClass klass = DnsClass.IN, DnsType type = DnsType.ANY)
+        public void SendQuery(DomainName name, DnsClass @class = DnsClass.IN, DnsType type = DnsType.ANY)
         {
             var msg = new Message
             {
@@ -404,7 +388,7 @@ namespace Makaretu.Dns
             msg.Questions.Add(new Question
             {
                 Name = name,
-                Class = klass,
+                Class = @class,
                 Type = type
             });
 
@@ -417,7 +401,7 @@ namespace Makaretu.Dns
         /// <param name="name">
         ///   A domain name that should end with ".local", e.g. "myservice.local".
         /// </param>
-        /// <param name="klass">
+        /// <param name="class">
         ///   The class, defaults to <see cref="DnsClass.IN"/>.
         /// </param>
         /// <param name="type">
@@ -431,7 +415,7 @@ namespace Makaretu.Dns
         /// <exception cref="InvalidOperationException">
         ///   When the service has not started.
         /// </exception>
-        public void SendUnicastQuery(DomainName name, DnsClass klass = DnsClass.IN, DnsType type = DnsType.ANY)
+        public void SendUnicastQuery(DomainName name, DnsClass @class = DnsClass.IN, DnsType type = DnsType.ANY)
         {
             var msg = new Message
             {
@@ -441,7 +425,7 @@ namespace Makaretu.Dns
             msg.Questions.Add(new Question
             {
                 Name = name,
-                Class = (DnsClass) ((ushort)klass | 0x8000),
+                Class = (DnsClass) ((ushort)@class | 0x8000),
                 Type = type
             });
 
@@ -689,6 +673,9 @@ namespace Makaretu.Dns
         {
             if (disposing)
             {
+                //Dispose of the clients
+                unicastClientIp4?.Dispose();
+                unicastClientIp6?.Dispose();
                 Stop();
             }
         }

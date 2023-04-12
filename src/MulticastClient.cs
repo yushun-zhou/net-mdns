@@ -47,12 +47,6 @@ namespace Makaretu.Dns
             {
                 receiver4 = new UdpClient(AddressFamily.InterNetwork);
                 receiver4.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-#if NETSTANDARD2_0
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    LinuxHelper.ReuseAddresss(receiver4.Client);
-                }
-#endif
                 receiver4.Client.Bind(new IPEndPoint(IPAddress.Any, MulticastPort));
                 receivers.Add(receiver4);
             }
@@ -62,12 +56,6 @@ namespace Makaretu.Dns
             {
                 receiver6 = new UdpClient(AddressFamily.InterNetworkV6);
                 receiver6.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-#if NETSTANDARD2_0
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    LinuxHelper.ReuseAddresss(receiver6.Client);
-                }
-#endif
                 receiver6.Client.Bind(new IPEndPoint(IPAddress.IPv6Any, MulticastPort));
                 receivers.Add(receiver6);
             }
@@ -93,12 +81,6 @@ namespace Makaretu.Dns
                         case AddressFamily.InterNetwork:
                             receiver4.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(MulticastAddressIp4, address));
                             sender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-#if NETSTANDARD2_0
-                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                            {
-                                LinuxHelper.ReuseAddresss(sender.Client);
-                            }
-#endif
                             sender.Client.Bind(localEndpoint);
                             sender.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(MulticastAddressIp4));
                             sender.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);

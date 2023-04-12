@@ -61,10 +61,8 @@ namespace Makaretu.Mdns.Simple
     /// <author>Erich Eichinger</author>
     public class ConsoleOutLoggerFactoryAdapter : Common.Logging.Simple.AbstractSimpleLoggerFactoryAdapter
     {
-#if !SILVERLIGHT
         private readonly bool useColor;
 
-#endif
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleOutLoggerFactoryAdapter"/> class using default 
         /// settings.
@@ -89,17 +87,6 @@ namespace Makaretu.Mdns.Simple
             : base(properties)
         { }
 
-#if false
-        /// <summary>
-        /// Constructor for binary backwards compatibility with non-portableversions
-        /// </summary>
-        /// <param name="properties">The properties.</param>
-        [Obsolete("Use Constructor taking Common.Logging.Configuration.NameValueCollection instead")]
-        public ConsoleOutLoggerFactoryAdapter(System.Collections.Specialized.NameValueCollection properties)
-            : this(NameValueCollectionHelper.ToCommonLoggingCollection(properties))
-        { }
-#endif
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractSimpleLoggerFactoryAdapter"/> class with 
         /// default settings for the loggers created by this factory.
@@ -108,7 +95,6 @@ namespace Makaretu.Mdns.Simple
             : base(level, showDateTime, showLogName, showLevel, dateTimeFormat)
         { }
 
-#if !SILVERLIGHT
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractSimpleLoggerFactoryAdapter"/> class with 
         /// default settings for the loggers created by this factory.
@@ -119,17 +105,12 @@ namespace Makaretu.Mdns.Simple
             this.useColor = useColor;
         }
 
-#endif
         /// <summary>
         /// Creates a new <see cref="ConsoleOutLogger"/> instance.
         /// </summary>
         protected override ILog CreateLogger(string name, LogLevel level, bool showLevel, bool showDateTime, bool showLogName, string dateTimeFormat)
         {
-#if !SILVERLIGHT
             ILog log = new ConsoleOutLogger(name, level, showLevel, showDateTime, showLogName, dateTimeFormat, this.useColor);
-#else
-            ILog log = new ConsoleOutLogger(name, level, showLevel, showDateTime, showLogName, dateTimeFormat);
-#endif
             return log;
         }
     }

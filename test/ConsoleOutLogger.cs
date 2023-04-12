@@ -37,7 +37,6 @@ namespace Makaretu.Mdns.Simple
 #endif
     public class ConsoleOutLogger : Common.Logging.Simple.AbstractSimpleLogger
     {
-#if !SILVERLIGHT
         private static readonly Dictionary<LogLevel, ConsoleColor> colors = new Dictionary<LogLevel, ConsoleColor>
         {
             { LogLevel.Fatal, ConsoleColor.Red },
@@ -50,7 +49,6 @@ namespace Makaretu.Mdns.Simple
 
         private readonly bool useColor;
 
-#endif
         /// <summary>
         /// Creates and initializes a logger that writes messages to <see cref="Console.Out" />.
         /// </summary>
@@ -65,7 +63,6 @@ namespace Makaretu.Mdns.Simple
         {
         }
 
-#if !SILVERLIGHT
         /// <summary>
         /// Creates and initializes a logger that writes messages to <see cref="Console.Out" />.
         /// </summary>
@@ -82,7 +79,6 @@ namespace Makaretu.Mdns.Simple
             this.useColor = useColor;
         }
 
-#endif
         /// <summary>
         /// Do the actual logging by constructing the log message using a <see cref="StringBuilder" /> then
         /// sending the output to <see cref="Console.Out" />.
@@ -97,7 +93,6 @@ namespace Makaretu.Mdns.Simple
             FormatOutput(sb, level, message, e);
 
             // Print to the appropriate destination
-#if !SILVERLIGHT
             ConsoleColor color;
             if (this.useColor && colors.TryGetValue(level, out color))
             {
@@ -114,7 +109,6 @@ namespace Makaretu.Mdns.Simple
                 }
             }
 
-#endif
             Console.Out.WriteLine(sb.ToString());
         }
     }

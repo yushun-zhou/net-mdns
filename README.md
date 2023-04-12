@@ -7,6 +7,8 @@
 [![Version](https://img.shields.io/nuget/v/Makaretu.Dns.Multicast.svg)](https://www.nuget.org/packages/Makaretu.Dns.Multicast)
 [![docs](https://cdn.rawgit.com/richardschneider/net-mdns/master/doc/images/docs-latest-green.svg)](https://richardschneider.github.io/net-mdns/articles/intro.html)
 
+Forked from https://github.com/richardschneider/net-mdns to update dependencies and continue development.
+
 A simple Multicast Domain Name Service based on [RFC 6762](https://tools.ietf.org/html/rfc6762).  Can be used 
 as both a client (sending queries) or a server (responding to queries).
 
@@ -15,7 +17,7 @@ service or service instance.
 
 ## Features
 
-- Targets Framework 4.6.1, .NET Standard 1.4 and 2.0
+- Targets .NET Standard 6.0
 - Supports IPv6 and IPv4 platforms
 - CI on Circle (Debian GNU/Linux), Travis (Ubuntu Xenial and OSX) and AppVeyor (Windows Server 2016)
 - Detects new and/or removed network interfaces
@@ -26,13 +28,13 @@ service or service instance.
 
 ## Getting started
 
-Published releases are available on [NuGet](https://www.nuget.org/packages/Makaretu.Dns.Multicast/).  To install, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
+Published releases are available on [NuGet](https://www.nuget.org/packages/Makaretu.Dns.Multicast.New/).  To install, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
 
-    PM> Install-Package Makaretu.Dns.Multicast
+    PM> Install-Package Makaretu.Dns.Multicast.New
     
 or using .NET CLI run the following command in the project folder
 
-    > dotnet add package Makaretu.Dns.Multicast
+    > dotnet add package Makaretu.Dns.Multicast.New
     
 ## Usage Service Discovery
 
@@ -149,5 +151,3 @@ mdns.Start();
 Copyright © 2018-2019 Richard Schneider (makaretu@gmail.com)
 
 The package is licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php "Read more about the MIT license form") license. Refer to the [LICENSE](https://github.com/richardschneider/net-mdns/blob/master/LICENSE) file for more information.
-
-<a href="https://www.buymeacoffee.com/kmXOxKJ4E" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
