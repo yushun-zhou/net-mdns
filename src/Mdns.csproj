@@ -10,8 +10,8 @@
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     
     <!-- developer build is always 0.42 -->
-    <AssemblyVersion>0.42</AssemblyVersion>
-    <Version>0.42</Version>
+    <AssemblyVersion>0.28</AssemblyVersion>
+    <Version>0.28</Version>
     
     <!-- Nuget specs -->
     <PackageId>Makaretu.Dns.Multicast.New</PackageId>
@@ -24,11 +24,14 @@
     <PackageTags>multicast mdns dns zeroconf</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <PackageProjectUrl>https://github.com/jdomnitz/net-mdns</PackageProjectUrl>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Makaretu.Dns" Version="2.0.1" />
+	<None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
