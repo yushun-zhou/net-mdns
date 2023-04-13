@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Makaretu.Dns" Version="1.2.0" />
+    <PackageReference Include="Makaretu.Dns" Version="3.0.0" />
   </ItemGroup>
 
 </Project>
