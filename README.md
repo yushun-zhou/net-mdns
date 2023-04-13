@@ -1,6 +1,6 @@
 # net-mdns
 
-[![build status](https://ci.appveyor.com/api/projects/status/github/jdomnitz/net-mdns?branch=master&svg=true)](https://ci.appveyor.com/project/jdomnitz/net-mdns) 
+[![Build](https://github.com/jdomnitz/net-mdns/actions/workflows/dotnet.yml/badge.svg)](https://github.com/jdomnitz/net-mdns/actions/workflows/dotnet.yml)
 [![Coverage Status](https://coveralls.io/repos/jdomnitz/net-mdns/badge.svg?branch=master&service=github)](https://coveralls.io/github/jdomnitz/net-mdns?branch=master)
 [![Version](https://img.shields.io/nuget/v/Makaretu.Dns.Multicast.New.svg)](https://www.nuget.org/packages/Makaretu.Dns.Multicast.New)
 [![docs](https://cdn.rawgit.com/jdomnitz/net-mdns/master/doc/images/docs-latest-green.svg)](https://jdomnitz.github.io/net-mdns/articles/intro.html)
