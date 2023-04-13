@@ -336,7 +336,7 @@ namespace Makaretu.Dns
             try
             {
                 Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "timeout");
-                Assert.IsTrue(nics.Count() > 0);
+                Assert.IsTrue(nics.Any());
             }
             finally
             {
