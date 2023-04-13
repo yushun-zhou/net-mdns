@@ -253,7 +253,7 @@ namespace Makaretu.Dns
                         res.Answers.Add(new AAAARecord
                         {
                             Name = service,
-                            Address = IPAddress.Parse("::2")
+                            Address = IPAddress.Parse("::1")
                         });
                         mdns.SendAnswer(res);
                     }
@@ -274,7 +274,7 @@ namespace Makaretu.Dns
                 Assert.AreEqual(MessageStatus.NoError, response.Status);
                 Assert.IsTrue(response.AA);
                 var a = (AAAARecord)response.Answers[0];
-                Assert.AreEqual(IPAddress.Parse("::2"), a.Address);
+                Assert.AreEqual(IPAddress.Parse("::1"), a.Address);
             }
         }
 
