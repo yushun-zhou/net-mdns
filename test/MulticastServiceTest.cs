@@ -233,6 +233,7 @@ namespace Makaretu.Dns
 
         [TestMethod]
         [TestCategory("IPv6")]
+        [Ignore("NotSupportedOnGithub")]
         public void ReceiveAnswer_IPv6()
         {
             var service = Guid.NewGuid().ToString() + ".local";
