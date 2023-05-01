@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	<TargetFrameworks>net6.0</TargetFrameworks>
@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="Common.Logging" Version="3.4.1" />
-    <PackageReference Include="Makaretu.Dns.New" Version="3.0.0" />
+    <PackageReference Include="Makaretu.Dns.New" Version="3.0.1" />
 	<None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
