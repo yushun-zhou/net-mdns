@@ -162,6 +162,16 @@ namespace Makaretu.Dns
         public bool IgnoreDuplicateMessages { get; set; }
 
         /// <summary>
+        /// Determines whether loopback interfaces should be excluded when other network interfaces are available
+        /// </summary>
+        /// <value>
+        /// <b>true</b> to always include loopback interfaces.
+        /// <b>false</b> to only include loopback interfaces when no other interfaces exist.
+        /// Defaults to <b>false</b>.
+        /// </value>
+        public static bool IncludeLoopbackInterfaces { get; set; } = false;
+
+        /// <summary>
         ///   Get the network interfaces that are useable.
         /// </summary>
         /// <returns>
@@ -182,7 +192,7 @@ namespace Makaretu.Dns
         {
             var nics = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(nic => nic.OperationalStatus == OperationalStatus.Up)
-                .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .Where(nic => IncludeLoopbackInterfaces || (nic.NetworkInterfaceType != NetworkInterfaceType.Loopback))
                 .ToArray();
             if (nics.Length > 0)
                 return nics;
