@@ -9,18 +9,17 @@
     <DebugType>full</DebugType>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     
-    <!-- developer build is always 0.42 -->
-    <AssemblyVersion>0.29</AssemblyVersion>
-    <Version>0.29</Version>
+    <AssemblyVersion>0.30</AssemblyVersion>
+    <Version>0.30</Version>
     
     <!-- Nuget specs -->
     <PackageId>Makaretu.Dns.Multicast.New</PackageId>
-    <Authors>Richard Schneider</Authors>
+    <Authors>Richard Schneider, jdomnitz</Authors>
     <Title>Multicast DNS</Title>
     <Description>A simple Multicast Domain Name Service based on RFC 6762.  Can be used as both a client (sending queries) or a server (responding to queries).</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>https://github.com/jdomnitz/net-mdns/releases</PackageReleaseNotes>
-    <Copyright>© 2018-2019 Richard Schneider</Copyright>
+    <Copyright>© 2018-2019 Richard Schneider, jdomnitz</Copyright>
     <PackageTags>multicast mdns dns zeroconf</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <PackageProjectUrl>https://github.com/jdomnitz/net-mdns</PackageProjectUrl>

@@ -17,12 +17,11 @@ service or service instance.
 
 - Targets .NET Standard 6.0
 - Supports IPv6 and IPv4 platforms
-- CI on Circle (Debian GNU/Linux), Travis (Ubuntu Xenial and OSX) and AppVeyor (Windows Server 2016)
 - Detects new and/or removed network interfaces
 - Supports multicasting on multiple network interfaces
 - Supports reverse address mapping
 - Supports service subtypes (features)
-- Handles legacy unicast queries, see #61
+- Handles legacy unicast queries and responses, see #61 and #91
 
 ## Getting started
 
