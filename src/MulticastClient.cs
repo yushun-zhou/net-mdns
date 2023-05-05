@@ -95,6 +95,7 @@ namespace Makaretu.Dns
                             throw new NotSupportedException($"Address family {address.AddressFamily}.");
                     }
 
+                    receivers.Add(sender);
                     log.Debug($"Will send via {localEndpoint}");
                     if (!senders.TryAdd(address, sender)) // Should not fail
                     {
@@ -197,21 +198,6 @@ namespace Makaretu.Dns
                         }
                     }
                     receivers.Clear();
-
-                    foreach (var address in senders.Keys)
-                    {
-                        if (senders.TryRemove(address, out var sender))
-                        {
-                            try
-                            {
-                                sender.Dispose();
-                            }
-                            catch
-                            {
-                                // eat it.
-                            }
-                        }
-                    }
                     senders.Clear();
                 }
 
