@@ -473,7 +473,11 @@ namespace Makaretu.Dns
             {
                 using (var sd = new ServiceDiscovery(mdns))
                 {
-                    mdns.NetworkInterfaceDiscovered += (s, e) => sd.Announce(service);
+                    mdns.NetworkInterfaceDiscovered += (s, e) =>
+                    {
+                        Assert.IsFalse(sd.Probe(service));
+                        sd.Announce(service);
+                    };
                     mdns.Start();
                     Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
                 }
@@ -507,7 +511,12 @@ namespace Makaretu.Dns
             {
                 using (var sd = new ServiceDiscovery(mdns))
                 {
-                    mdns.NetworkInterfaceDiscovered += (s, e) => sd.Announce(service);
+                    mdns.NetworkInterfaceDiscovered +=
+                    (s, e) =>
+                    {
+                        Assert.IsFalse(sd.Probe(service));
+                        sd.Announce(service);
+                    };
                     mdns.Start();
                     Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
                 }
@@ -543,7 +552,11 @@ namespace Makaretu.Dns
             {
                 using (var sd = new ServiceDiscovery(mdns))
                 {
-                    mdns.NetworkInterfaceDiscovered += (s, e) => sd.Announce(service);
+                    mdns.NetworkInterfaceDiscovered += (s, e) =>
+                    {
+                        Assert.IsFalse(sd.Probe(service));
+                        sd.Announce(service);
+                    };
                     mdns.Start();
                     Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(4)), "announce timeout");
                 }

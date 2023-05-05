@@ -584,7 +584,7 @@ namespace Makaretu.Dns
             Send(answer, checkDuplicate, query.RemoteEndPoint);
         }
 
-        void Send(Message msg, bool checkDuplicate, IPEndPoint remoteEndPoint = null)
+        internal void Send(Message msg, bool checkDuplicate, IPEndPoint remoteEndPoint = null)
         {
             var packet = msg.ToByteArray();
             if (packet.Length > maxPacketSize)

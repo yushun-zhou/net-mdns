@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Common.Logging;
 using Makaretu.Dns.Resolving;
 
@@ -17,6 +19,7 @@ namespace Makaretu.Dns
         static readonly ILog log = LogManager.GetLogger(typeof(ServiceDiscovery));
         static readonly DomainName LocalDomain = new DomainName("local");
         static readonly DomainName SubName = new DomainName("_sub");
+        static readonly ushort transaction = (ushort)new Random().Next(10000, int.MaxValue);
 
         /// <summary>
         ///   The service discovery service name.
@@ -28,6 +31,7 @@ namespace Makaretu.Dns
 
         readonly bool ownsMdns;
         List<ServiceProfile> profiles = new List<ServiceProfile>();
+        bool conflict;
 
         /// <summary>
         ///   Creates a new instance of the <see cref="ServiceDiscovery"/> class.
@@ -258,6 +262,40 @@ namespace Makaretu.Dns
         }
 
         /// <summary>
+        /// Probe the network to ensure the service is unique.
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <returns>True if thise service conflicts with an existing network service</returns>
+        public bool Probe(ServiceProfile profile)
+        {
+            conflict = false;
+            Message msg = new Message
+            {
+                Opcode = MessageOperation.Query,
+                QR = false,
+                Id = transaction
+            };
+            msg.Questions.Add(new Question
+            {
+                Name = profile.HostName,
+                Class = DnsClass.IN,
+                Type = DnsType.ANY
+            });
+
+            Task.Delay(new Random().Next(0, 250)).Wait();
+            Mdns.Send(msg, false);
+
+            Task.Delay(250).Wait();
+            Mdns.Send(msg, false);
+
+            Task.Delay(250).Wait();
+            Mdns.Send(msg, false);
+
+            Task.Delay(250).Wait();
+            return conflict;
+        }
+
+        /// <summary>
         ///    Sends an unsolicited MDNS response describing the
         ///    service profile.
         /// </summary>
@@ -335,6 +373,11 @@ namespace Makaretu.Dns
             }
 
             // Any DNS-SD answers?
+            if (msg.Id == transaction)
+            {
+                if (msg.Answers.Count > 0)
+                    conflict = true;
+            }
 
             var sd = msg.Answers
                 .OfType<PTRRecord>()
