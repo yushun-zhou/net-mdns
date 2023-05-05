@@ -44,7 +44,10 @@ using Makaretu.Dns;
 
 var service = new ServiceProfile("x", "_foo._tcp", 1024);
 var sd = new ServiceDiscovery();
-sd.Advertise(service);
+if (sd.Probe(service))
+    // Handle the service conflict
+else
+    sd.Advertise(service);
 ```
 
 See the [example advertiser](Spike/Program.cs) for a working program.
