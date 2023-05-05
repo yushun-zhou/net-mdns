@@ -44,12 +44,10 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     sd.Advertise(service);
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
             }
             finally
             {
@@ -76,12 +74,10 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     sd.Advertise(service);
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
             }
             finally
             {
@@ -108,12 +104,10 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     sd.Advertise(service);
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
             }
             finally
             {
@@ -141,12 +135,10 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     sd.Advertise(service);
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
             }
             finally
             {
@@ -323,43 +315,41 @@ namespace Makaretu.Dns
             var service = new ServiceProfile("y", "_sdtest-2._udp", 1024, new[] { IPAddress.Parse("127.1.1.1") });
             var done = new ManualResetEvent(false);
 
-            using (var mdns = new MulticastService())
-            using (var sd = new ServiceDiscovery(mdns) { AnswersContainsAdditionalRecords = true })
+            using var mdns = new MulticastService();
+            using var sd = new ServiceDiscovery(mdns) { AnswersContainsAdditionalRecords = true };
+            Message discovered = null;
+
+            mdns.NetworkInterfaceDiscovered += (s, e) =>
             {
-                Message discovered = null;
+                sd.QueryServiceInstances(service.ServiceName);
+            };
 
-                mdns.NetworkInterfaceDiscovered += (s, e) =>
+            sd.ServiceInstanceDiscovered += (s, e) =>
+            {
+                if (e.ServiceInstanceName == service.FullyQualifiedName)
                 {
-                    sd.QueryServiceInstances(service.ServiceName);
-                };
+                    Assert.IsNotNull(e.Message);
+                    discovered = e.Message;
+                    done.Set();
+                }
+            };
 
-                sd.ServiceInstanceDiscovered += (s, e) =>
-                {
-                    if (e.ServiceInstanceName == service.FullyQualifiedName)
-                    {
-                        Assert.IsNotNull(e.Message);
-                        discovered = e.Message;
-                        done.Set();
-                    }
-                };
+            sd.Advertise(service);
 
-                sd.Advertise(service);
+            mdns.Start();
 
-                mdns.Start();
+            Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "instance not found");
 
-                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "instance not found");
+            var additionalRecordsCount =
+                1 + // SRVRecord
+                1 + // TXTRecord
+                1; // AddressRecord
 
-                var additionalRecordsCount =
-                    1 + // SRVRecord
-                    1 + // TXTRecord
-                    1; // AddressRecord
+            var answersCount = additionalRecordsCount +
+                1; // PTRRecord
 
-                var answersCount = additionalRecordsCount +
-                    1; // PTRRecord
-
-                Assert.AreEqual(0, discovered.AdditionalRecords.Count);
-                Assert.AreEqual(answersCount, discovered.Answers.Count);
-            }
+            Assert.AreEqual(0, discovered.AdditionalRecords.Count);
+            Assert.AreEqual(answersCount, discovered.Answers.Count);
         }
 
         [TestMethod]
@@ -413,20 +403,18 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     sd.Advertise(service);
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
-                    var answers = response.Answers
-                        .OfType<PTRRecord>()
-                        .Where(ptr => service.HostName == ptr.DomainName);
-                    foreach (var answer in answers)
-                    {
-                        Assert.AreEqual(arpaAddress, answer.Name);
-                        Assert.IsTrue(answer.TTL > TimeSpan.Zero);
-                        Assert.AreEqual(DnsClass.IN, answer.Class);
-                    }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(1)), "query timeout");
+                var answers = response.Answers
+                    .OfType<PTRRecord>()
+                    .Where(ptr => service.HostName == ptr.DomainName);
+                foreach (var answer in answers)
+                {
+                    Assert.AreEqual(arpaAddress, answer.Name);
+                    Assert.IsTrue(answer.TTL > TimeSpan.Zero);
+                    Assert.AreEqual(DnsClass.IN, answer.Class);
                 }
             }
             finally
@@ -442,15 +430,13 @@ namespace Makaretu.Dns
             profile.Subtypes.Add("apiv2");
             profile.AddProperty("someprop", "somevalue");
 
-            using (var sd = new ServiceDiscovery())
-            {
+            using var sd = new ServiceDiscovery();
                 sd.Advertise(profile);
 
-                var resourceRecords = sd.NameServer.Catalog.Values.SelectMany(node => node.Resources);
-                foreach (var r in resourceRecords)
-                {
-                    Console.WriteLine(r.ToString());
-                }
+            var resourceRecords = sd.NameServer.Catalog.Values.SelectMany(node => node.Resources);
+            foreach (var r in resourceRecords)
+            {
+                Console.WriteLine(r.ToString());
             }
         }
 
@@ -471,16 +457,14 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     mdns.NetworkInterfaceDiscovered += (s, e) =>
                     {
                         Assert.IsFalse(sd.Probe(service));
                         sd.Announce(service);
                     };
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
             }
             finally
             {
@@ -509,17 +493,15 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     mdns.NetworkInterfaceDiscovered +=
                     (s, e) =>
                     {
                         Assert.IsFalse(sd.Probe(service));
                         sd.Announce(service);
                     };
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(3)), "announce timeout");
             }
             finally
             {
@@ -550,16 +532,14 @@ namespace Makaretu.Dns
             };
             try
             {
-                using (var sd = new ServiceDiscovery(mdns))
-                {
+                using var sd = new ServiceDiscovery(mdns);
                     mdns.NetworkInterfaceDiscovered += (s, e) =>
                     {
                         Assert.IsFalse(sd.Probe(service));
                         sd.Announce(service);
                     };
-                    mdns.Start();
-                    Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(4)), "announce timeout");
-                }
+                mdns.Start();
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(4)), "announce timeout");
             }
             finally
             {

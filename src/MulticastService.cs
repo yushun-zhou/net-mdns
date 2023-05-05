@@ -38,12 +38,12 @@ namespace Makaretu.Dns
         /// <summary>
         ///   Recently sent messages.
         /// </summary>
-        RecentMessages sentMessages = new RecentMessages();
+        readonly RecentMessages sentMessages = new RecentMessages();
 
         /// <summary>
         ///   Recently received messages.
         /// </summary>
-        RecentMessages receivedMessages = new RecentMessages();
+        readonly RecentMessages receivedMessages = new RecentMessages();
 
         /// <summary>
         ///   The multicast client.
@@ -53,17 +53,17 @@ namespace Makaretu.Dns
         /// <summary>
         ///   Use to send unicast IPv4 answers.
         /// </summary>
-        UdpClient unicastClientIp4 = new UdpClient(AddressFamily.InterNetwork);
+        readonly UdpClient unicastClientIp4 = new UdpClient(AddressFamily.InterNetwork);
 
         /// <summary>
         ///   Use to send unicast IPv6 answers.
         /// </summary>
-        UdpClient unicastClientIp6 = new UdpClient(AddressFamily.InterNetworkV6);
+        readonly UdpClient unicastClientIp6 = new UdpClient(AddressFamily.InterNetworkV6);
 
         /// <summary>
         ///   Function used for listening filtered network interfaces.
         /// </summary>
-        Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>> networkInterfacesFilter;
+        readonly Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>> networkInterfacesFilter;
 
         /// <summary>
         ///   Set the default TTLs.
@@ -343,7 +343,7 @@ namespace Makaretu.Dns
         }
 
         /// <inheritdoc />
-        public Task<Message> ResolveAsync(Message request, CancellationToken cancel = default(CancellationToken))
+        public Task<Message> ResolveAsync(Message request, CancellationToken cancel = default)
         {
             var tsc = new TaskCompletionSource<Message>();
 
@@ -694,6 +694,7 @@ namespace Makaretu.Dns
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
 #endregion

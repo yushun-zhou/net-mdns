@@ -1,9 +1,4 @@
-﻿using Makaretu.Dns;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Makaretu.Dns
+﻿namespace Makaretu.Dns
 {
     /// <summary>
     ///   The event data for <see cref="ServiceDiscovery.ServiceInstanceShutdown"/>.

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Common.Logging;
 using Makaretu.Dns.Resolving;
 
@@ -30,7 +28,7 @@ namespace Makaretu.Dns
         public static readonly DomainName ServiceName = new DomainName("_services._dns-sd._udp.local");
 
         readonly bool ownsMdns;
-        List<ServiceProfile> profiles = new List<ServiceProfile>();
+        readonly List<ServiceProfile> profiles = new List<ServiceProfile>();
         bool conflict;
 
         /// <summary>
@@ -504,6 +502,7 @@ namespace Makaretu.Dns
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
