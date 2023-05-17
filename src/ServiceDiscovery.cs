@@ -8,16 +8,16 @@ using Makaretu.Dns.Resolving;
 namespace Makaretu.Dns
 {
     /// <summary>
-    ///   DNS based Service Discovery is a way of using standard DNS programming interfaces, servers, 
+    ///   DNS based Service Discovery is a way of using standard DNS programming interfaces, servers,
     ///   and packet formats to browse the network for services.
     /// </summary>
     /// <seealso href="https://tools.ietf.org/html/rfc6763">RFC 6763 DNS-Based Service Discovery</seealso>
-    public class ServiceDiscovery : IDisposable
+    public class ServiceDiscovery : IServiceDiscovery
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(ServiceDiscovery));
-        static readonly DomainName LocalDomain = new DomainName("local");
-        static readonly DomainName SubName = new DomainName("_sub");
-        static readonly ushort transaction = (ushort)new Random().Next(10000, int.MaxValue);
+        private static readonly ILog log = LogManager.GetLogger(typeof(ServiceDiscovery));
+        private static readonly DomainName LocalDomain = new DomainName("local");
+        private static readonly DomainName SubName = new DomainName("_sub");
+        private static readonly ushort transaction = (ushort)new Random().Next(10000, int.MaxValue);
 
         /// <summary>
         ///   The service discovery service name.
@@ -27,9 +27,9 @@ namespace Makaretu.Dns
         /// </value>
         public static readonly DomainName ServiceName = new DomainName("_services._dns-sd._udp.local");
 
-        readonly bool ownsMdns;
-        readonly List<ServiceProfile> profiles = new List<ServiceProfile>();
-        bool conflict;
+        private readonly bool ownsMdns;
+        private readonly List<ServiceProfile> profiles = new List<ServiceProfile>();
+        private bool conflict;
 
         /// <summary>
         ///   Creates a new instance of the <see cref="ServiceDiscovery"/> class.
@@ -45,12 +45,12 @@ namespace Makaretu.Dns
 
         /// <summary>
         ///   Creates a new instance of the <see cref="ServiceDiscovery"/> class with
-        ///   the specified <see cref="MulticastService"/>.
+        ///   the specified <see cref="IMulticastService"/>.
         /// </summary>
         /// <param name="mdns">
-        ///   The underlaying <see cref="MulticastService"/> to use.
+        ///   The underlying <see cref="IMulticastService"/> to use.
         /// </param>
-        public ServiceDiscovery(MulticastService mdns)
+        public ServiceDiscovery(IMulticastService mdns)
         {
             this.Mdns = mdns;
             mdns.QueryReceived += OnQuery;
@@ -61,9 +61,9 @@ namespace Makaretu.Dns
         ///   Gets the multicasting service.
         /// </summary>
         /// <value>
-        ///   Is used to send and recieve multicast <see cref="Message">DNS messages</see>.
+        ///   Is used to send and receive multicast <see cref="Message">DNS messages</see>.
         /// </value>
-        public MulticastService Mdns { get; private set; }
+        public IMulticastService Mdns { get; private set; }
 
         /// <summary>
         ///   Add the additional records into the answers.
@@ -102,7 +102,7 @@ namespace Makaretu.Dns
         /// </value>
         /// <remarks>
         ///   <b>ServiceDiscovery</b> passively monitors the network for any answers
-        ///   to a DNS-SD query. When an anwser is received this event is raised.
+        ///   to a DNS-SD query. When an answer is received this event is raised.
         ///   <para>
         ///   Use <see cref="QueryAllServices"/> to initiate a DNS-SD question.
         ///   </para>
@@ -110,20 +110,20 @@ namespace Makaretu.Dns
         public event EventHandler<DomainName> ServiceDiscovered;
 
         /// <summary>
-        ///   Raised when a servive instance is discovered.
+        ///   Raised when a service instance is discovered.
         /// </summary>
         /// <value>
         ///   Contains the service instance name.
         /// </value>
         /// <remarks>
         ///   <b>ServiceDiscovery</b> passively monitors the network for any answers.
-        ///   When an answer containing a PTR to a service instance is received 
+        ///   When an answer containing a PTR to a service instance is received
         ///   this event is raised.
         /// </remarks>
         public event EventHandler<ServiceInstanceDiscoveryEventArgs> ServiceInstanceDiscovered;
 
         /// <summary>
-        ///   Raised when a servive instance is shutting down.
+        ///   Raised when a service instance is shutting down.
         /// </summary>
         /// <value>
         ///   Contains the service instance name.
@@ -134,7 +134,7 @@ namespace Makaretu.Dns
         ///   TTL of zero is received this event is raised.
         /// </remarks>
         public event EventHandler<ServiceInstanceShutdownEventArgs> ServiceInstanceShutdown;
-        
+
         /// <summary>
         ///    Asks other MDNS services to send their service names.
         /// </summary>
@@ -263,7 +263,7 @@ namespace Makaretu.Dns
         /// Probe the network to ensure the service is unique.
         /// </summary>
         /// <param name="profile"></param>
-        /// <returns>True if thise service conflicts with an existing network service</returns>
+        /// <returns>True if this service conflicts with an existing network service</returns>
         public bool Probe(ServiceProfile profile)
         {
             conflict = false;
@@ -281,13 +281,13 @@ namespace Makaretu.Dns
             });
 
             Task.Delay(new Random().Next(0, 250)).Wait();
-            Mdns.Send(msg, false);
+            Mdns.SendQuery(msg);
 
             Task.Delay(250).Wait();
-            Mdns.Send(msg, false);
+            Mdns.SendQuery(msg);
 
             Task.Delay(250).Wait();
-            Mdns.Send(msg, false);
+            Mdns.SendQuery(msg);
 
             Task.Delay(250).Wait();
             return conflict;
@@ -351,14 +351,14 @@ namespace Makaretu.Dns
         }
 
         /// <summary>
-        /// Sends a goodbye message for each anounced service.
+        /// Sends a goodbye message for each announced service.
         /// </summary>
         public void Unadvertise()
         {
             profiles.ForEach(profile => Unadvertise(profile));
         }
 
-        void OnAnswer(object sender, MessageEventArgs e)
+        private void OnAnswer(object sender, MessageEventArgs e)
         {
             var msg = e.Message;
             if (log.IsDebugEnabled)
@@ -407,7 +407,7 @@ namespace Makaretu.Dns
             }
         }
 
-        void OnQuery(object sender, MessageEventArgs e)
+        private void OnQuery(object sender, MessageEventArgs e)
         {
             var request = e.Message;
 
@@ -505,6 +505,6 @@ namespace Makaretu.Dns
             GC.SuppressFinalize(this);
         }
 
-        #endregion
+        #endregion IDisposable Support
     }
 }
