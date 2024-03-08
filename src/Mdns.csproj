@@ -1,36 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<TargetFrameworks>net6.0</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>Makaretu.Dns.Multicast.New</AssemblyName>
-    <RootNamespace>Makaretu.Dns</RootNamespace>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <DebugType>full</DebugType>
-    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
-    
-    <AssemblyVersion>0.31</AssemblyVersion>
-    <Version>0.31</Version>
-    
-    <!-- Nuget specs -->
-    <PackageId>Makaretu.Dns.Multicast.New</PackageId>
-    <Authors>Richard Schneider, jdomnitz</Authors>
-    <Title>Multicast DNS</Title>
-    <Description>A simple Multicast Domain Name Service based on RFC 6762.  Can be used as both a client (sending queries) or a server (responding to queries).</Description>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>https://github.com/jdomnitz/net-mdns/releases</PackageReleaseNotes>
-    <Copyright>© 2018-2019 Richard Schneider, jdomnitz</Copyright>
-    <PackageTags>multicast mdns dns zeroconf</PackageTags>
-    <IncludeSymbols>True</IncludeSymbols>
-    <PackageProjectUrl>https://github.com/jdomnitz/net-mdns</PackageProjectUrl>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<LangVersion>Latest</LangVersion>
+		<Nullable>Enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyName>Makaretu.Dns.Multicast.New</AssemblyName>
+		<RootNamespace>Makaretu.Dns</RootNamespace>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+		<DebugType>full</DebugType>
+		<DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
 
-  <ItemGroup>
-    <PackageReference Include="Common.Logging" Version="3.4.1" />
-    <PackageReference Include="Makaretu.Dns.New" Version="3.0.1" />
-	<None Include="..\README.md" Pack="true" PackagePath="\"/>
-  </ItemGroup>
+		<AssemblyVersion>0.41</AssemblyVersion>
+		<Version>0.41</Version>
+
+		<!-- Nuget specs -->
+		<PackageId>Makaretu.Dns.Multicast.New</PackageId>
+		<Authors>Richard Schneider, jdomnitz</Authors>
+		<Title>Multicast DNS</Title>
+		<Description>A simple Multicast Domain Name Service based on RFC 6762.  Can be used as both a client (sending queries) or a server (responding to queries).</Description>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageReleaseNotes>https://github.com/jdomnitz/net-mdns/releases</PackageReleaseNotes>
+		<Copyright>© 2018-2019 Richard Schneider, jdomnitz</Copyright>
+		<PackageTags>multicast mdns dns zeroconf</PackageTags>
+		<IncludeSymbols>True</IncludeSymbols>
+		<PackageProjectUrl>https://github.com/jdomnitz/net-mdns</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Makaretu.Dns.New" Version="4.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>

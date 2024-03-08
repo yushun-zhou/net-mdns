@@ -202,3 +202,5 @@ FakesAssemblies/
 # VS 2017 creates this
 src/Makaretu.Dns.Multicast.xml
 
+nuget.config
+
