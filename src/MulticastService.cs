@@ -37,7 +37,7 @@ public class MulticastService : IMulticastService
     /// <summary>
     ///     Function used for listening filtered network interfaces.
     /// </summary>
-    private readonly Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>> networkInterfacesFilter;
+    private readonly Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>>? networkInterfacesFilter;
 
     /// <summary>
     ///     Recently received messages.
@@ -62,9 +62,9 @@ public class MulticastService : IMulticastService
     /// <summary>
     ///     The multicast client.
     /// </summary>
-    private MulticastClient client;
+    private MulticastClient? client;
 
-    private List<NetworkInterface> knownNics = new();
+    private List<NetworkInterface> knownNics = [];
     private int maxPacketSize;
 
     /// <summary>
@@ -85,7 +85,7 @@ public class MulticastService : IMulticastService
     /// <param name="filter">
     ///     Multicast listener will be bound to result of filtering function.
     /// </param>
-    public MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>> filter = null)
+    public MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>>? filter = null)
     {
         networkInterfacesFilter = filter;
 
@@ -115,7 +115,7 @@ public class MulticastService : IMulticastService
     ///     then forgotten.
     /// </remarks>
     /// <seealso cref="SendQuery(Message)" />
-    public event EventHandler<MessageEventArgs> QueryReceived;
+    public event EventHandler<MessageEventArgs>? QueryReceived;
 
     /// <summary>
     ///     Raised when any link-local MDNS service responds to a query.
@@ -127,7 +127,7 @@ public class MulticastService : IMulticastService
     ///     Any exception throw by the event handler is simply logged and
     ///     then forgotten.
     /// </remarks>
-    public event EventHandler<MessageEventArgs> AnswerReceived;
+    public event EventHandler<MessageEventArgs>? AnswerReceived;
 
     /// <summary>
     ///     Raised when a DNS message is received that cannot be decoded.
@@ -143,7 +143,7 @@ public class MulticastService : IMulticastService
     /// <value>
     ///     Contains the network interface(s).
     /// </value>
-    public event EventHandler<NetworkInterfaceEventArgs> NetworkInterfaceDiscovered;
+    public event EventHandler<NetworkInterfaceEventArgs>? NetworkInterfaceDiscovered;
 
     /// <summary>
     ///     Send and receive on IPv4.
@@ -581,14 +581,14 @@ public class MulticastService : IMulticastService
             var newNics = new List<NetworkInterface>();
             var oldNics = new List<NetworkInterface>();
 
-            foreach (var nic in knownNics.Where(k => !currentNics.Any(n => k.Id == n.Id)))
+            foreach (var nic in knownNics.Where(k => currentNics.All(n => k.Id != n.Id)))
             {
                 oldNics.Add(nic);
 
                 log.LogDebug($"Removed nic '{nic.Name}'.");
             }
 
-            foreach (var nic in currentNics.Where(nic => !knownNics.Any(k => k.Id == nic.Id)))
+            foreach (var nic in currentNics.Where(nic => knownNics.All(k => k.Id != nic.Id)))
             {
                 newNics.Add(nic);
 
@@ -631,7 +631,7 @@ public class MulticastService : IMulticastService
         }
     }
 
-    internal void Send(Message msg, bool checkDuplicate, IPEndPoint remoteEndPoint = null)
+    internal void Send(Message msg, bool checkDuplicate, IPEndPoint? remoteEndPoint = null)
     {
         var packet = msg.ToByteArray();
         if (packet.Length > maxPacketSize)

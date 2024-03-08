@@ -11,10 +11,10 @@
 		<DebugType>full</DebugType>
 		<DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
 
-		<AssemblyVersion>0.41</AssemblyVersion>
-		<Version>0.41</Version>
+		<AssemblyVersion>0.43</AssemblyVersion>
+		<Version>0.43</Version>
 
-		<!-- Nuget specs -->
+		<!-- Nuget specs  -->
 		<PackageId>Makaretu.Dns.Multicast.New</PackageId>
 		<Authors>Richard Schneider, jdomnitz</Authors>
 		<Title>Multicast DNS</Title>
@@ -27,10 +27,12 @@
 		<PackageProjectUrl>https://github.com/jdomnitz/net-mdns</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Makaretu.Dns.New" Version="4.0.1" />
+		<PackageReference Include="Makaretu.Dns.New" Version="4.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
 		<None Include="..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>

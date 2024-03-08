@@ -23,7 +23,7 @@ public class MessageEventArgs : EventArgs
     /// <value>
     ///     The endpoint from the message was received.
     /// </value>
-    public IPEndPoint RemoteEndPoint { get; set; }
+    public IPEndPoint? RemoteEndPoint { get; set; }
 
     /// <summary>
     ///     Determines if the sender is using legacy unicast DNS.

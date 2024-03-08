@@ -14,7 +14,6 @@ public class ServiceProfile
     static ServiceProfile()
     {
         // Make sure MulticastService is inited.
-        ReferenceEquals(null, null);
     }
 
     /// <summary>
@@ -82,7 +81,7 @@ public class ServiceProfile
     /// <value>
     ///     Always "local".
     /// </value>
-    public DomainName Domain { get; } = "local";
+    public DomainName Domain => "local";
 
     /// <summary>
     ///     A unique name for the service.
@@ -150,7 +149,7 @@ public class ServiceProfile
     ///         are also present and are associaed with <see cref="HostName" />.
     ///     </para>
     /// </remarks>
-    public List<ResourceRecord> Resources { get; set; } = new();
+    public List<ResourceRecord> Resources { get; set; } = [];
 
     /// <summary>
     ///     A list of service features implemented by the service instance.
@@ -159,7 +158,7 @@ public class ServiceProfile
     ///     The default is an empty list.
     /// </value>
     /// <seealso href="https://tools.ietf.org/html/rfc6763#section-7.1" />
-    public List<string> Subtypes { get; set; } = new();
+    public List<string> Subtypes { get; set; } = [];
 
     /// <summary>
     ///     Add a property of the service to the <see cref="TXTRecord" />.

@@ -37,7 +37,7 @@ internal class MulticastClient : IDisposable
     public MulticastClient(bool useIPv4, bool useIpv6, IEnumerable<NetworkInterface> nics)
     {
         // Setup the receivers.
-        receivers = new List<UdpClient>();
+        receivers = [];
 
         UdpClient receiver4 = null;
         if (useIPv4)

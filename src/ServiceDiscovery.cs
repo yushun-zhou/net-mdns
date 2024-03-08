@@ -33,7 +33,7 @@ public class ServiceDiscovery : IServiceDiscovery
     public static readonly DomainName ServiceName = new("_services._dns-sd._udp.local");
 
     private readonly bool ownsMdns;
-    private readonly List<ServiceProfile> profiles = new();
+    private readonly List<ServiceProfile> profiles = [];
     private bool conflict;
 
     /// <summary>
