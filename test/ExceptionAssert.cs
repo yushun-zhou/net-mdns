@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Makaretu
+namespace Makaretu.Mdns
 {
     /// <summary>
     ///   Asserting an <see cref="Exception"/>.
