@@ -18,7 +18,14 @@ namespace Makaretu.Dns;
 ///         raised when a <see cref="Message" /> is received.
 ///     </para>
 /// </remarks>
-public class MulticastService : IMulticastService
+/// <remarks>
+///     Create a new instance of the <see cref="MulticastService" /> class.
+/// </remarks>
+/// <param name="filter">
+///     Multicast listener will be bound to result of filtering function.
+/// </param>
+public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>>? filter = null)
+    : IMulticastService
 {
     // IP header (20 bytes for IPv4; 40 bytes for IPv6) and the UDP header(8 bytes).
     private const int packetOverhead = 48;
@@ -28,11 +35,6 @@ public class MulticastService : IMulticastService
 
     private static readonly ILogger<MulticastService>
         log = new Logger<MulticastService>(ServiceDiscovery.LoggerFactory);
-
-    /// <summary>
-    ///     Function used for listening filtered network interfaces.
-    /// </summary>
-    private readonly Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>>? networkInterfacesFilter;
 
     /// <summary>
     ///     Recently received messages.
@@ -72,21 +74,6 @@ public class MulticastService : IMulticastService
         // https://tools.ietf.org/html/rfc6762 section 10
         ResourceRecord.DefaultTTL = TimeSpan.FromMinutes(75);
         ResourceRecord.DefaultHostTTL = TimeSpan.FromSeconds(120);
-    }
-
-    /// <summary>
-    ///     Create a new instance of the <see cref="MulticastService" /> class.
-    /// </summary>
-    /// <param name="filter">
-    ///     Multicast listener will be bound to result of filtering function.
-    /// </param>
-    public MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<NetworkInterface>>? filter = null)
-    {
-        networkInterfacesFilter = filter;
-
-        UseIpv4 = Socket.OSSupportsIPv4;
-        UseIpv6 = Socket.OSSupportsIPv6;
-        IgnoreDuplicateMessages = true;
     }
 
     /// <summary>
@@ -146,7 +133,7 @@ public class MulticastService : IMulticastService
     /// <value>
     ///     Defaults to <b>true</b> if the OS supports it.
     /// </value>
-    public bool UseIpv4 { get; set; }
+    public bool UseIpv4 { get; set; } = Socket.OSSupportsIPv4;
 
     /// <summary>
     ///     Send and receive on IPv6.
@@ -154,7 +141,7 @@ public class MulticastService : IMulticastService
     /// <value>
     ///     Defaults to <b>true</b> if the OS supports it.
     /// </value>
-    public bool UseIpv6 { get; set; }
+    public bool UseIpv6 { get; set; } = Socket.OSSupportsIPv6;
 
     /// <summary>
     ///     Determines if received messages are checked for duplicates.
@@ -166,7 +153,7 @@ public class MulticastService : IMulticastService
     ///     When set, a message that has been received within the last minute
     ///     will be ignored.
     /// </remarks>
-    public bool IgnoreDuplicateMessages { get; set; }
+    public bool IgnoreDuplicateMessages { get; set; } = true;
 
     /// <summary>
     ///     Start the service.
@@ -247,7 +234,7 @@ public class MulticastService : IMulticastService
     /// <exception cref="InvalidOperationException">
     ///     When the service has not started.
     /// </exception>
-    public void SendQuery(DomainName name, DnsClass @class = DnsClass.IN, DnsType type = DnsType.ANY)
+    public void SendQuery(DomainName? name, DnsClass @class = DnsClass.IN, DnsType type = DnsType.ANY)
     {
         var msg = new Message
         {
@@ -455,7 +442,7 @@ public class MulticastService : IMulticastService
     ///         event is raised.
     ///     </para>
     /// </remarks>
-    public void OnDnsMessage(object sender, UdpReceiveResult result)
+    public void OnDnsMessage(object? sender, UdpReceiveResult result)
     {
         // If recently received, then ignore.
         if (IgnoreDuplicateMessages && !receivedMessages.TryAdd(result.Buffer)) return;
@@ -467,7 +454,7 @@ public class MulticastService : IMulticastService
         }
         catch (Exception e)
         {
-            log.LogWarning("Received malformed message", e);
+            log.LogWarning("Received malformed message: {ex}", e);
             MalformedMessage?.Invoke(this, result.Buffer);
             return; // eat the exception
         }
@@ -486,7 +473,7 @@ public class MulticastService : IMulticastService
         }
         catch (Exception e)
         {
-            log.LogError("Receive handler failed", e);
+            log.LogError("Receive handler failed {ex}", e);
             // eat the exception
         }
     }
@@ -557,7 +544,7 @@ public class MulticastService : IMulticastService
     {
         return GetIPAddresses()
             .Where(a => a.AddressFamily == AddressFamily.InterNetwork ||
-                        (a.AddressFamily == AddressFamily.InterNetworkV6 && a.IsIPv6LinkLocal));
+                        a is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv6LinkLocal: true });
     }
 
     private void OnNetworkAddressChanged(object sender, EventArgs e)
@@ -580,28 +567,28 @@ public class MulticastService : IMulticastService
             {
                 oldNics.Add(nic);
 
-                log.LogDebug($"Removed nic '{nic.Name}'.");
+                log.LogDebug("Removed nic '{nicName}'.", nic.Name);
             }
 
             foreach (var nic in currentNics.Where(nic => knownNics.All(k => k.Id != nic.Id)))
             {
                 newNics.Add(nic);
 
-                log.LogDebug($"Found nic '{nic.Name}'.");
+                log.LogDebug("Found nic '{nicName}'.", nic.Name);
             }
 
             knownNics = currentNics;
 
             // Only create client if something has change.
-            if (newNics.Any() || oldNics.Any())
+            if (newNics.Count > 0 || oldNics.Count > 0)
             {
                 client?.Dispose();
-                client = new MulticastClient(UseIpv4, UseIpv6, networkInterfacesFilter?.Invoke(knownNics) ?? knownNics);
+                client = new MulticastClient(UseIpv4, UseIpv6, filter?.Invoke(knownNics) ?? knownNics);
                 client.MessageReceived += OnDnsMessage;
             }
 
             // Tell others.
-            if (newNics.Any())
+            if (newNics.Count > 0)
                 NetworkInterfaceDiscovered?.Invoke(this, new NetworkInterfaceEventArgs
                 {
                     NetworkInterfaces = newNics
@@ -622,7 +609,7 @@ public class MulticastService : IMulticastService
         }
         catch (Exception e)
         {
-            log.LogError("FindNics failed", e);
+            log.LogError("FindNics failed {ex}", e);
         }
     }
 
