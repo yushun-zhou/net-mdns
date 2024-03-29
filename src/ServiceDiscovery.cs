@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Makaretu.Dns.Resolving;
+﻿using Makaretu.Dns.Resolving;
 using Microsoft.Extensions.Logging;
 
 namespace Makaretu.Dns;
