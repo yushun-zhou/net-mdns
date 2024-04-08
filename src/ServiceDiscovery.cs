@@ -1,5 +1,6 @@
 ﻿using Makaretu.Dns.Resolving;
-using Microsoft.Extensions.Logging;
+using Santec.Shared.Extensions;
+using Serilog;
 
 namespace Makaretu.Dns;
 
@@ -13,9 +14,8 @@ public class ServiceDiscovery : IServiceDiscovery
     /// <summary>
     ///     Logger factory
     /// </summary>
-    public static readonly LoggerFactory LoggerFactory = new();
 
-    private static readonly ILogger<ServiceDiscovery> log = new Logger<ServiceDiscovery>(LoggerFactory);
+    private static readonly ILogger log = Serilog.Log.ForContext<ServiceDiscovery>();
     private static readonly DomainName LocalDomain = new("local");
     private static readonly DomainName SubName = new("_sub");
     private static readonly ushort transaction = (ushort)new Random().Next(10000, int.MaxValue);
@@ -356,8 +356,8 @@ public class ServiceDiscovery : IServiceDiscovery
     private void OnAnswer(object sender, MessageEventArgs e)
     {
         var msg = e.Message;
-        log.LogDebug($"Answer from {e.RemoteEndPoint}");
-        log.LogTrace(msg.ToString());
+        log.Here().Debug("Answer from {RemoteEndPoint}", e.RemoteEndPoint);
+        log.Here().Verbose(msg.ToString());
 
         // Any DNS-SD answers?
         if (msg.Id == transaction)
@@ -396,8 +396,8 @@ public class ServiceDiscovery : IServiceDiscovery
     {
         var request = e.Message;
 
-        log.LogDebug($"Query from {e.RemoteEndPoint}");
-        log.LogTrace(request.ToString());
+        log.Here().Debug("Query from {RemoteEndPoint}", e.RemoteEndPoint);
+        log.Here().Verbose(request.ToString());
 
         // Determine if this query is requesting a unicast response
         // and normalise the Class.
@@ -410,6 +410,7 @@ public class ServiceDiscovery : IServiceDiscovery
             }
 
         var response = NameServer.ResolveAsync(request).Result;
+        log.Here().Debug("response: {@response}", response);
 
         if (response.Status != MessageStatus.NoError) return;
 
@@ -431,8 +432,8 @@ public class ServiceDiscovery : IServiceDiscovery
         else
             Mdns.SendAnswer(response, e);
 
-        log.LogDebug("Sending answer");
-        log.LogTrace(response.ToString());
+        log.Debug("Sending answer");
+        log.Verbose(response.ToString());
         //Console.WriteLine($"Response time {(DateTime.Now - request.CreationTime).TotalMilliseconds}ms");
     }
 

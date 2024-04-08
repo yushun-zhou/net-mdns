@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Makaretu.Dns;
 
@@ -12,7 +12,7 @@ namespace Makaretu.Dns;
 /// </summary>
 internal class MulticastClient : IDisposable
 {
-    private static readonly ILogger<MulticastClient> log = new Logger<MulticastClient>(ServiceDiscovery.LoggerFactory);
+    private static readonly ILogger log = Log.ForContext<MulticastClient>();
 
     /// <summary>
     ///     The port number assigned to Multicast DNS.
@@ -42,6 +42,7 @@ internal class MulticastClient : IDisposable
             receiver4.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             receiver4.Client.Bind(new IPEndPoint(IPAddress.Any, MulticastPort));
             receivers.Add(receiver4);
+            senders.TryAdd(MulticastAddressIp4, receiver4);
         }
 
         UdpClient receiver6 = null;
@@ -51,7 +52,9 @@ internal class MulticastClient : IDisposable
             receiver6.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             receiver6.Client.Bind(new IPEndPoint(IPAddress.IPv6Any, MulticastPort));
             receivers.Add(receiver6);
+            senders.TryAdd(MulticastAddressIp6, receiver6);
         }
+
 
         // Get the IP addresses that we should send to.
         var addreses = nics
@@ -60,7 +63,7 @@ internal class MulticastClient : IDisposable
                         || (useIpv6 && a.AddressFamily == AddressFamily.InterNetworkV6));
         foreach (var address in addreses)
         {
-            if (senders.Keys.Contains(address)) continue;
+            if (senders.ContainsKey(address)) continue;
 
             var localEndpoint = new IPEndPoint(address, MulticastPort);
             var sender = new UdpClient(address.AddressFamily);
@@ -91,7 +94,7 @@ internal class MulticastClient : IDisposable
                 }
 
                 receivers.Add(sender);
-                log.LogDebug($"Will send via {localEndpoint}");
+                log.Debug("Will send via {localEndpoint}", localEndpoint);
                 if (!senders.TryAdd(address, sender)) // Should not fail
                     sender.Dispose();
             }
@@ -102,7 +105,7 @@ internal class MulticastClient : IDisposable
             }
             catch (Exception e)
             {
-                log.LogError($"Cannot setup send socket for {address}: {e.Message}");
+                log.Error($"Cannot setup send socket for {address}: {e.Message}");
                 sender.Dispose();
             }
         }
@@ -128,35 +131,43 @@ internal class MulticastClient : IDisposable
             }
             catch (Exception e)
             {
-                log.LogError($"Sender {sender.Key} failure: {e.Message}");
+                log.Error($"Sender {sender.Key} failure: {e.Message}");
                 // eat it.
             }
     }
 
-    private void Listen(UdpClient receiver)
+    private async void Listen(UdpClient receiver)
     {
         // ReceiveAsync does not support cancellation.  So the receiver is disposed
         // to stop it. See https://github.com/dotnet/corefx/issues/9848
-        Task.Run(async () =>
+        //Task.Run(async () =>
+        //{
+        while (true)
         {
             try
             {
-                var task = receiver.ReceiveAsync();
+                var result = await receiver.ReceiveAsync();
+                //Listen(receiver);
+                MessageReceived?.Invoke(this, result);
 
-                _ = task.ContinueWith(x => Listen(receiver),
-                    TaskContinuationOptions.OnlyOnRanToCompletion |
-                    TaskContinuationOptions.RunContinuationsAsynchronously);
+                //var task = receiver.ReceiveAsync();
 
-                _ = task.ContinueWith(x => MessageReceived?.Invoke(this, x.Result),
-                    TaskContinuationOptions.OnlyOnRanToCompletion |
-                    TaskContinuationOptions.RunContinuationsAsynchronously);
+                //_ = task.ContinueWith(x => Listen(receiver),
+                //    TaskContinuationOptions.OnlyOnRanToCompletion |
+                //    TaskContinuationOptions.RunContinuationsAsynchronously);
 
-                await task.ConfigureAwait(false);
+                //_ = task.ContinueWith(x => MessageReceived?.Invoke(this, x.Result),
+                //    TaskContinuationOptions.OnlyOnRanToCompletion |
+                //    TaskContinuationOptions.RunContinuationsAsynchronously);
+
+                //await task.ConfigureAwait(false);
             }
-            catch
+            catch (Exception e)
             {
+                //ignored
             }
-        });
+        }
+        //});
     }
 
     private IEnumerable<IPAddress> GetNetworkInterfaceLocalAddresses(NetworkInterface nic)
