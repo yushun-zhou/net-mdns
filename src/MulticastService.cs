@@ -624,7 +624,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         // Standard multicast reponse?
         if (remoteEndPoint == null)
         {
-            await client?.SendAsync(packet)!;
+            await client!.SendAsync(packet).ConfigureAwait(false);
         }
         // Unicast response
         else
@@ -632,7 +632,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
             var unicastClient = remoteEndPoint.Address.AddressFamily == AddressFamily.InterNetwork
                 ? unicastClientIp4
                 : unicastClientIp6;
-            await unicastClient.SendAsync(packet, packet.Length, remoteEndPoint);
+            await unicastClient.SendAsync(packet, packet.Length, remoteEndPoint).ConfigureAwait(false);
         }
     }
 

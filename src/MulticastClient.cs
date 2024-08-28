@@ -146,7 +146,7 @@ internal class MulticastClient : IDisposable
         {
             try
             {
-                var result = await receiver.ReceiveAsync();
+                var result = await receiver.ReceiveAsync().ConfigureAwait(false);
                 //Listen(receiver);
                 MessageReceived?.Invoke(this, result);
 
