@@ -47,7 +47,7 @@ public class ServiceProfile
     ///     The SRV, TXT and A/AAAA resoruce records are added to the <see cref="Resources" />.
     /// </remarks>
     public ServiceProfile(DomainName instanceName, DomainName serviceName, ushort port,
-        IEnumerable<IPAddress> addresses = null)
+        IEnumerable<IPAddress>? addresses = null)
     {
         InstanceName = instanceName;
         ServiceName = serviceName;

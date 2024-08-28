@@ -116,7 +116,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
     /// <value>
     ///     The DNS message as a byte array.
     /// </value>
-    public event EventHandler<byte[]> MalformedMessage;
+    public event EventHandler<byte[]>? MalformedMessage;
 
     /// <summary>
     ///     Raised when one or more network interfaces are discovered.
@@ -192,16 +192,6 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
     {
         var tsc = new TaskCompletionSource<Message>();
 
-        void checkResponse(object s, MessageEventArgs e)
-        {
-            var response = e.Message;
-            if (request.Questions.All(q => response.Answers.Any(a => a.Name == q.Name)))
-            {
-                AnswerReceived -= checkResponse;
-                tsc.SetResult(response);
-            }
-        }
-
         cancel.Register(() =>
         {
             AnswerReceived -= checkResponse;
@@ -212,6 +202,16 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         SendQuery(request);
 
         return tsc.Task;
+
+        void checkResponse(object? s, MessageEventArgs e)
+        {
+            var response = e.Message;
+            if (request.Questions.All(q => response.Answers.Any(a => a.Name == q.Name)))
+            {
+                AnswerReceived -= checkResponse;
+                tsc.SetResult(response);
+            }
+        }
     }
 
     /// <summary>
@@ -547,7 +547,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
                         a is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv6LinkLocal: true });
     }
 
-    private void OnNetworkAddressChanged(object sender, EventArgs e)
+    private void OnNetworkAddressChanged(object? sender, EventArgs e)
     {
         FindNetworkInterfaces();
     }
@@ -624,7 +624,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         // Standard multicast reponse?
         if (remoteEndPoint == null)
         {
-            await client?.SendAsync(packet);
+            await client?.SendAsync(packet)!;
         }
         // Unicast response
         else

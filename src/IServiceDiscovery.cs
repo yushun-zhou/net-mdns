@@ -16,7 +16,7 @@ public interface IServiceDiscovery : IDisposable
     /// <value>
     ///     Is used to send and receive multicast <see cref="Message">DNS messages</see>.
     /// </value>
-    public IMulticastService Mdns { get; }
+    public IMulticastService? Mdns { get; }
 
     /// <summary>
     ///     Add the additional records into the answers.

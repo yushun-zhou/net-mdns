@@ -31,5 +31,5 @@ public class MessageEventArgs : EventArgs
     /// <value>
     ///     <b>false</b> if the sender is using port 5353.
     /// </value>
-    public bool IsLegacyUnicast => RemoteEndPoint.Port != MulticastClient.MulticastPort;
+    public bool IsLegacyUnicast => RemoteEndPoint?.Port != MulticastClient.MulticastPort;
 }

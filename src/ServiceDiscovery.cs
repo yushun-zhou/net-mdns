@@ -41,7 +41,7 @@ public class ServiceDiscovery : IServiceDiscovery
         ownsMdns = true;
 
         // Auto start.
-        Mdns.Start();
+        Mdns?.Start();
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// <value>
     ///     Is used to send and receive multicast <see cref="Message">DNS messages</see>.
     /// </value>
-    public IMulticastService Mdns { get; private set; }
+    public IMulticastService? Mdns { get; private set; }
 
     /// <summary>
     ///     Add the additional records into the answers.
@@ -91,7 +91,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// </value>
     public NameServer NameServer { get; } = new()
     {
-        Catalog = new Catalog(),
+        Catalog = [],
         AnswerAllQuestions = true
     };
 
@@ -108,7 +108,7 @@ public class ServiceDiscovery : IServiceDiscovery
     ///         Use <see cref="QueryAllServices" /> to initiate a DNS-SD question.
     ///     </para>
     /// </remarks>
-    public event EventHandler<DomainName> ServiceDiscovered;
+    public event EventHandler<DomainName>? ServiceDiscovered;
 
     /// <summary>
     ///     Raised when a service instance is discovered.
@@ -121,7 +121,7 @@ public class ServiceDiscovery : IServiceDiscovery
     ///     When an answer containing a PTR to a service instance is received
     ///     this event is raised.
     /// </remarks>
-    public event EventHandler<ServiceInstanceDiscoveryEventArgs> ServiceInstanceDiscovered;
+    public event EventHandler<ServiceInstanceDiscoveryEventArgs>? ServiceInstanceDiscovered;
 
     /// <summary>
     ///     Raised when a service instance is shutting down.
@@ -134,7 +134,7 @@ public class ServiceDiscovery : IServiceDiscovery
     ///     When an answer containing a PTR to a service instance with a
     ///     TTL of zero is received this event is raised.
     /// </remarks>
-    public event EventHandler<ServiceInstanceShutdownEventArgs> ServiceInstanceShutdown;
+    public event EventHandler<ServiceInstanceShutdownEventArgs>? ServiceInstanceShutdown;
 
     /// <summary>
     ///     Asks other MDNS services to send their service names.
@@ -144,7 +144,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// </remarks>
     public void QueryAllServices()
     {
-        Mdns.SendQuery(ServiceName, type: DnsType.PTR);
+        Mdns?.SendQuery(ServiceName, type: DnsType.PTR);
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// </remarks>
     public void QueryUnicastAllServices()
     {
-        Mdns.SendUnicastQuery(ServiceName, type: DnsType.PTR);
+        Mdns?.SendUnicastQuery(ServiceName, type: DnsType.PTR);
     }
 
     /// <summary>
@@ -171,7 +171,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// <seealso cref="ServiceProfile.ServiceName" />
     public void QueryServiceInstances(DomainName service)
     {
-        Mdns.SendQuery(DomainName.Join(service, LocalDomain), type: DnsType.PTR);
+        Mdns?.SendQuery(DomainName.Join(service, LocalDomain), type: DnsType.PTR);
     }
 
     /// <summary>
@@ -194,7 +194,7 @@ public class ServiceDiscovery : IServiceDiscovery
             SubName,
             service,
             LocalDomain);
-        Mdns.SendQuery(name, type: DnsType.PTR);
+        Mdns?.SendQuery(name, type: DnsType.PTR);
     }
 
     /// <summary>
@@ -210,7 +210,7 @@ public class ServiceDiscovery : IServiceDiscovery
     /// <seealso cref="ServiceProfile.ServiceName" />
     public void QueryUnicastServiceInstances(DomainName service)
     {
-        Mdns.SendUnicastQuery(DomainName.Join(service, LocalDomain), type: DnsType.PTR);
+        Mdns?.SendUnicastQuery(DomainName.Join(service, LocalDomain), type: DnsType.PTR);
     }
 
     /// <summary>
@@ -279,13 +279,13 @@ public class ServiceDiscovery : IServiceDiscovery
         });
 
         Task.Delay(new Random().Next(0, 250)).Wait();
-        Mdns.SendQuery(msg);
+        Mdns?.SendQuery(msg);
 
         Task.Delay(250).Wait();
-        Mdns.SendQuery(msg);
+        Mdns?.SendQuery(msg);
 
         Task.Delay(250).Wait();
-        Mdns.SendQuery(msg);
+        Mdns?.SendQuery(msg);
 
         Task.Delay(250).Wait();
         return conflict;
@@ -317,9 +317,9 @@ public class ServiceDiscovery : IServiceDiscovery
         // Add the resource records.
         profile.Resources.ForEach(resource => { message.Answers.Add(resource); });
 
-        Mdns.SendAnswer(message, false);
+        Mdns?.SendAnswer(message, false);
         Task.Delay(1000).Wait();
-        Mdns.SendAnswer(message, false);
+        Mdns?.SendAnswer(message, false);
     }
 
     /// <summary>
@@ -330,8 +330,12 @@ public class ServiceDiscovery : IServiceDiscovery
     public void Unadvertise(ServiceProfile profile)
     {
         var message = new Message { QR = true };
-        var ptrRecord = new PTRRecord { Name = profile.QualifiedServiceName, DomainName = profile.FullyQualifiedName };
-        ptrRecord.TTL = TimeSpan.Zero;
+        var ptrRecord = new PTRRecord
+        {
+            Name = profile.QualifiedServiceName, 
+            DomainName = profile.FullyQualifiedName,
+            TTL = TimeSpan.Zero
+        };
 
         message.Answers.Add(ptrRecord);
         profile.Resources.ForEach(resource =>
@@ -340,7 +344,7 @@ public class ServiceDiscovery : IServiceDiscovery
             message.AdditionalRecords.Add(resource);
         });
 
-        Mdns.SendAnswer(message);
+        Mdns?.SendAnswer(message);
 
         NameServer.Catalog.TryRemove(profile.QualifiedServiceName, out var _);
     }
@@ -353,7 +357,7 @@ public class ServiceDiscovery : IServiceDiscovery
         profiles.ForEach(profile => Unadvertise(profile));
     }
 
-    private void OnAnswer(object sender, MessageEventArgs e)
+    private void OnAnswer(object? sender, MessageEventArgs e)
     {
         var msg = e.Message;
         log.Here().Debug("Answer from {RemoteEndPoint}", e.RemoteEndPoint);
@@ -366,17 +370,17 @@ public class ServiceDiscovery : IServiceDiscovery
 
         var sd = msg.Answers
             .OfType<PTRRecord>()
-            .Where(ptr => ptr.Name.IsSubdomainOf(LocalDomain));
+            .Where(ptr => ptr.Name!.IsSubdomainOf(LocalDomain));
         foreach (var ptr in sd)
             if (ptr.Name == ServiceName)
             {
-                ServiceDiscovered?.Invoke(this, ptr.DomainName);
+                ServiceDiscovered?.Invoke(this, ptr.DomainName!);
             }
             else if (ptr.TTL == TimeSpan.Zero)
             {
                 var args = new ServiceInstanceShutdownEventArgs
                 {
-                    ServiceInstanceName = ptr.DomainName,
+                    ServiceInstanceName = ptr.DomainName!,
                     Message = msg
                 };
                 ServiceInstanceShutdown?.Invoke(this, args);
@@ -385,14 +389,14 @@ public class ServiceDiscovery : IServiceDiscovery
             {
                 var args = new ServiceInstanceDiscoveryEventArgs
                 {
-                    ServiceInstanceName = ptr.DomainName,
+                    ServiceInstanceName = ptr.DomainName!,
                     Message = msg
                 };
                 ServiceInstanceDiscovered?.Invoke(this, args);
             }
     }
 
-    private void OnQuery(object sender, MessageEventArgs e)
+    private void OnQuery(object? sender, MessageEventArgs e)
     {
         var request = e.Message;
 
@@ -424,13 +428,15 @@ public class ServiceDiscovery : IServiceDiscovery
             response.AdditionalRecords.Clear();
         }
 
-        if (!response.Answers.Any(a => a.Name == ServiceName)) ;
+        if (response.Answers.All(a => a.Name != ServiceName))
+        {
+        }
 
         if (QU)
             // TODO: Send a Unicast response if required.
-            Mdns.SendAnswer(response, e);
+            Mdns?.SendAnswer(response, e);
         else
-            Mdns.SendAnswer(response, e);
+            Mdns?.SendAnswer(response, e);
 
         log.Debug("Sending answer");
         log.Verbose(response.ToString());

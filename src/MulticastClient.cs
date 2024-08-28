@@ -35,7 +35,7 @@ internal class MulticastClient : IDisposable
         // Setup the receivers.
         receivers = [];
 
-        UdpClient receiver4 = null;
+        UdpClient? receiver4 = null;
         if (useIPv4)
         {
             receiver4 = new UdpClient(AddressFamily.InterNetwork);
@@ -45,7 +45,7 @@ internal class MulticastClient : IDisposable
             senders.TryAdd(MulticastAddressIp4, receiver4);
         }
 
-        UdpClient receiver6 = null;
+        UdpClient? receiver6 = null;
         if (useIpv6)
         {
             receiver6 = new UdpClient(AddressFamily.InterNetworkV6);
@@ -72,7 +72,7 @@ internal class MulticastClient : IDisposable
                 switch (address.AddressFamily)
                 {
                     case AddressFamily.InterNetwork:
-                        receiver4.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership,
+                        receiver4!.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership,
                             new MulticastOption(MulticastAddressIp4, address));
                         sender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                         sender.Client.Bind(localEndpoint);
@@ -81,7 +81,7 @@ internal class MulticastClient : IDisposable
                         sender.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);
                         break;
                     case AddressFamily.InterNetworkV6:
-                        receiver6.Client.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership,
+                        receiver6!.Client.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership,
                             new IPv6MulticastOption(MulticastAddressIp6, address.ScopeId));
                         sender.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                         sender.Client.Bind(localEndpoint);
@@ -114,7 +114,7 @@ internal class MulticastClient : IDisposable
         foreach (var r in receivers) Listen(r);
     }
 
-    public event EventHandler<UdpReceiveResult> MessageReceived;
+    public event EventHandler<UdpReceiveResult>? MessageReceived;
 
     public async Task SendAsync(byte[] message)
     {
