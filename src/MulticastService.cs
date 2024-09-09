@@ -2,6 +2,7 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Santec.Shared.Extensions;
 using Serilog;
 
 namespace Makaretu.Dns;
