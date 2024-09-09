@@ -12,7 +12,7 @@ namespace Makaretu.Dns;
 /// </summary>
 internal class MulticastClient : IDisposable
 {
-    private static readonly ILogger log = Log.ForContext<MulticastClient>();
+    private static readonly ILogger Log = Log.ForContext<MulticastClient>();
 
     /// <summary>
     ///     The port number assigned to Multicast DNS.
@@ -94,7 +94,7 @@ internal class MulticastClient : IDisposable
                 }
 
                 receivers.Add(sender);
-                log.Debug("Will send via {localEndpoint}", localEndpoint);
+                Log.Debug("Will send via {localEndpoint}", localEndpoint);
                 if (!senders.TryAdd(address, sender)) // Should not fail
                     sender.Dispose();
             }
@@ -105,7 +105,7 @@ internal class MulticastClient : IDisposable
             }
             catch (Exception e)
             {
-                log.Error($"Cannot setup send socket for {address}: {e.Message}");
+                Log.Error($"Cannot setup send socket for {address}: {e.Message}");
                 sender.Dispose();
             }
         }
@@ -131,7 +131,7 @@ internal class MulticastClient : IDisposable
             }
             catch (Exception e)
             {
-                log.Error($"Sender {sender.Key} failure: {e.Message}");
+                Log.Error($"Sender {sender.Key} failure: {e.Message}");
                 // eat it.
             }
     }
@@ -191,16 +191,22 @@ internal class MulticastClient : IDisposable
             if (disposing)
             {
                 MessageReceived = null;
-
-                foreach (var receiver in receivers)
-                    try
-                    {
-                        receiver.Dispose();
-                    }
-                    catch
-                    {
-                        // eat it.
-                    }
+                try
+                {
+                    foreach (var receiver in receivers)
+                        try
+                        {
+                            receiver.Dispose();
+                        }
+                        catch
+                        {
+                            // eat it.
+                        }
+                }
+                catch (Exception e)
+                {
+                    Log.Here().Error(e, "Error disposing");
+                }
 
                 receivers.Clear();
                 senders.Clear();

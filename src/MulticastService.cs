@@ -33,7 +33,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
 
     private static readonly TimeSpan maxLegacyUnicastTTL = TimeSpan.FromSeconds(10);
 
-    private static readonly ILogger log = Serilog.Log.ForContext<MulticastService>();
+    private static readonly ILogger Log = Serilog.Log.ForContext<MulticastService>();
 
     /// <summary>
     ///     Recently received messages.
@@ -450,11 +450,11 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         try
         {
             msg.Read(result.Buffer, 0, result.Buffer.Length);
-            log.Debug("Message: {message}", msg);
+            Log.Debug("Message: {message}", msg);
         }
         catch (Exception e)
         {
-            log.Warning("Received malformed message: {ex}", e);
+            Log.Warning("Received malformed message: {ex}", e);
             MalformedMessage?.Invoke(this, result.Buffer);
             return; // eat the exception
         }
@@ -473,7 +473,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         }
         catch (Exception e)
         {
-            log.Error("Receive handler failed {ex}", e);
+            Log.Error("Receive handler failed {ex}", e);
             // eat the exception
         }
     }
@@ -554,7 +554,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
 
     private void FindNetworkInterfaces()
     {
-        log.Debug("Finding network interfaces");
+        Log.Debug("Finding network interfaces");
 
         try
         {
@@ -567,14 +567,14 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
             {
                 oldNics.Add(nic);
 
-                log.Debug("Removed nic '{nicName}'.", nic.Name);
+                Log.Debug("Removed nic '{nicName}'.", nic.Name);
             }
 
             foreach (var nic in currentNics.Where(nic => knownNics.All(k => k.Id != nic.Id)))
             {
                 newNics.Add(nic);
 
-                log.Debug("Found nic '{nicName}'.", nic.Name);
+                Log.Debug("Found nic '{nicName}'.", nic.Name);
             }
 
             knownNics = currentNics;
@@ -609,7 +609,7 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
         }
         catch (Exception e)
         {
-            log.Error("FindNics failed {ex}", e);
+            Log.Error("FindNics failed {ex}", e);
         }
     }
 
@@ -643,10 +643,17 @@ public class MulticastService(Func<IEnumerable<NetworkInterface>, IEnumerable<Ne
     {
         if (disposing)
         {
-            //Dispose of the clients
-            unicastClientIp4?.Dispose();
-            unicastClientIp6?.Dispose();
-            Stop();
+            try
+            {
+                //Dispose of the clients
+                unicastClientIp4?.Dispose();
+                unicastClientIp6?.Dispose();
+                Stop();
+            }
+            catch (Exception e)
+            {
+                Log.Here().Error(e, "Error disposing");
+            }
         }
     }
 
